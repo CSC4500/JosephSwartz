@@ -1,0 +1,156 @@
+
+-- create the database
+DROP DATABASE IF EXISTS murderhoboinc;
+CREATE DATABASE murderhoboinc;
+
+-- select the database
+USE murderhoboinc;
+
+-- create the tables
+CREATE TABLE employee
+(
+  emp_id       INT            PRIMARY KEY auto_increment,
+  emp_fname varchar(35) not null,
+  emp_lname varchar(35) not null,
+  emp_phone varchar(25),
+  emp_email varchar(50),
+  emp_address varchar(50) not null,
+  emp_city varchar(25) not null,
+  emp_state varchar(2) not null,
+  emp_zip varchar(10) not null,
+  emp_pos int not null,
+  emp_factory int not null  
+);
+
+CREATE TABLE e_position
+(
+  pos_id              INT            PRIMARY KEY   AUTO_INCREMENT,
+  pos_name     VARCHAR(50)    NOT NULL,
+  pos_rateofpay	decimal(5,2),
+  pos_dept int not null,
+  pos_emp int
+);
+CREATE TABLE department
+(
+  dept_id   INT  PRIMARY KEY   AUTO_INCREMENT,
+  dept_name     VARCHAR(50)    NOT NULL,
+  dept_pos int not null
+);
+
+CREATE TABLE customer
+(
+  cust_id                     INT            PRIMARY KEY   AUTO_INCREMENT,
+  cust_name                   VARCHAR(50)    NOT NULL      UNIQUE,
+  cust_address1               VARCHAR(50),
+  cust_address2               VARCHAR(50),
+  cust_city                   VARCHAR(50)    NOT NULL,
+  cust_state                  CHAR(2)        NOT NULL,
+  cust_zip_code               VARCHAR(20)    NOT NULL,
+  cust_phone                  VARCHAR(50),
+  cust_contact_last_name      VARCHAR(50),
+  cust_contact_first_name     VARCHAR(50),
+  cust_contact_email varchar(50),
+  cust_invoice INT            
+);
+
+CREATE TABLE invoice
+(
+  invoice_id            INT            PRIMARY KEY   AUTO_INCREMENT,
+  cust_id             INT            NOT NULL,
+  invoice_date          DATE           NOT NULL,
+  invoice_total         DECIMAL(9,2)   NOT NULL,
+  invoice_shipdate DATE,
+  products              INT            NOT NULL
+
+);
+
+
+CREATE TABLE factory
+(
+  factory_id      INT          PRIMARY KEY auto_increment,
+  factory_address       VARCHAR(50)  NOT NULL,
+  factory_city                   VARCHAR(50)    NOT NULL,
+  factory_state                  CHAR(2)        NOT NULL,
+  factory_zip_code               VARCHAR(20)    NOT NULL,
+  factory_products int,
+  factory_depts int not null,
+  factory_employees int not null
+
+);
+
+create table product
+(
+	product_id int primary key auto_increment,
+    product_type varchar(35) not null,
+    product_factory  int not null,
+    product_invoice int,
+    product_price decimal(9,2)
+
+);
+
+alter table employee
+	add CONSTRAINT emp_fk_pos
+    FOREIGN KEY (emp_pos)
+    REFERENCES e_position (pos_id),
+	add    constraint emp_fk_factory
+    foreign key (emp_factory)
+    references factory (factory_id);
+    
+alter table e_position 
+	add constraint pos_fk_dept
+	foreign key (pos_dept)
+	references department(dept_id),
+    add constraint pos_fk_emp
+    foreign key (pos_emp)
+    references employee(emp_id);
+
+alter table department 
+	add constraint dept_fk_pos
+	foreign key (dept_pos)
+	references e_position(pos_id);
+
+alter table customer
+add  CONSTRAINT cust_fk_invoice
+    FOREIGN KEY (cust_invoice)
+    REFERENCES invoice (invoice_id);
+    
+alter table invoice
+add  CONSTRAINT invoices_fk_customers
+    FOREIGN KEY (cust_id)
+    REFERENCES customer (cust_id),
+ add CONSTRAINT invoice_fk_products
+    FOREIGN KEY (products)
+    REFERENCES product (product_id);
+    
+alter table factory
+add constraint factory_fk_products
+  foreign key (factory_products)
+  references product(product_id),
+ add constraint factory_fk_depts
+  foreign key (factory_depts)
+  references department(dept_id),
+add  constraint factory_fk_employee
+  foreign key (factory_employees)
+  references employee(emp_id);
+  
+  alter table product
+	add constraint product_fk_factory
+        foreign key (product_factory)
+        references factory(factory_id),
+	add constraint product_fk_order
+        foreign key (product_invoice)
+        references invoice(invoice_id);
+        
+
+
+    
+
+  
+
+
+
+
+
+
+
+
