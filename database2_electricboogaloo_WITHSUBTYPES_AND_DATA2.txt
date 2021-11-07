@@ -1,0 +1,488 @@
+
+-- create the database
+DROP DATABASE IF EXISTS murderhoboinc;
+CREATE DATABASE murderhoboinc;
+
+-- select the database
+USE murderhoboinc;
+
+-- create the tables
+CREATE TABLE department
+(
+  dept_id   INT  PRIMARY KEY   AUTO_INCREMENT,
+  dept_name     VARCHAR(50)    NOT NULL
+);
+
+CREATE TABLE factory
+(
+  factory_id      INT          PRIMARY KEY auto_increment,
+  factory_address       VARCHAR(50)  NOT NULL,
+  factory_city                   VARCHAR(50)    NOT NULL ,
+  factory_state                  CHAR(2)        NOT NULL,
+  factory_zip_code               VARCHAR(20)    NOT NULL
+);
+
+CREATE TABLE e_position
+(
+  pos_id              INT            PRIMARY KEY   AUTO_INCREMENT,
+  pos_name     VARCHAR(50)    NOT NULL,
+  pos_rateofpay	decimal(5,2),
+  pos_dept int not null,
+  constraint pos_fk_dept
+	foreign key (pos_dept)
+	references department(dept_id)
+);
+
+CREATE TABLE employee
+(
+  emp_id       INT            PRIMARY KEY auto_increment,
+  emp_fname varchar(35) not null,
+  emp_lname varchar(35) not null,
+  emp_phone varchar(25),
+  emp_email varchar(50),
+  emp_address varchar(50) not null,
+  emp_city varchar(25) not null,
+  emp_state char(2) not null,
+  emp_zip varchar(10) not null,
+  emp_pos int not null,
+  emp_factory int not null,
+ CONSTRAINT emp_fk_pos
+    FOREIGN KEY (emp_pos)
+    REFERENCES e_position (pos_id),
+constraint emp_fk_factory
+    foreign key (emp_factory)
+    references factory (factory_id) 
+  
+);
+
+
+
+
+CREATE TABLE customer
+(
+  cust_id                     INT            PRIMARY KEY   AUTO_INCREMENT,
+  cust_name                   VARCHAR(50)    NOT NULL,
+  cust_address               VARCHAR(50),
+  cust_city                   VARCHAR(50)    NOT NULL default 'Ababwa',
+  cust_state                  CHAR(2)        NOT NULL,
+  cust_zip_code               VARCHAR(20)    NOT NULL,
+  cust_phone                  VARCHAR(50),
+  cust_contact_last_name      VARCHAR(50),
+  cust_contact_first_name     VARCHAR(50),
+  cust_contact_email varchar(50)     
+);
+
+CREATE TABLE invoice
+(
+  invoice_id            INT            PRIMARY KEY   AUTO_INCREMENT,
+  cust_id             INT            NOT NULL,
+  invoice_date          DATE           NOT NULL,
+  invoice_shipdate DATE,
+  invoice_total decimal(9,2) default null,
+  CONSTRAINT invoices_fk_customers
+    FOREIGN KEY (cust_id)
+    REFERENCES customer (cust_id)
+
+);
+
+create table product_type
+(
+	product_type_id int primary key auto_increment,
+    product_type varchar(25)
+);
+
+
+create table product
+(
+	product_id int primary key auto_increment,
+	product_type_id int not null,
+    product_factory  int not null,
+    product_totalqty int,
+    constraint product_fk_factory
+        foreign key (product_factory)
+        references factory(factory_id),
+	constraint product_fk_prodtype
+		foreign key(product_type_id)
+        references product_type(product_type_id)
+
+);
+
+
+create table product_order
+(
+	product_id int,
+    invoice_id int,
+    product_price decimal(9,2),
+    product_qty int,
+    order_total DECIMAL(9,2) default (product_price*product_qty),
+	primary key(product_id, invoice_id),
+    constraint product_id_fk_order
+		foreign key (product_id)
+        references product(product_id),
+	constraint invoice_id_fk_order
+		foreign key (invoice_id)
+        references invoice(invoice_id)
+    
+);
+
+create table di_set
+(
+	product_id int primary key,
+    product_type_id  int not null default 1 check (product_type_id = 1),
+    set_color varchar(25) not null,
+    set_material varchar(25) not null,
+    set_pcs int not null,
+    constraint di_fk_id
+		foreign key (product_id)
+        references product(product_id),
+	constraint di_fk_type
+		foreign key (product_type_id)
+        references product_type(product_type_id)
+);
+
+create table miniature
+(
+	product_id int primary key,
+    product_type_id  int not null default 2 check (product_type_id = 2),
+    mini_model varchar(25) not null,
+    mini_size varchar(25) not null 
+		check(mini_size = 'S' OR mini_size = 'M' OR mini_size='L'),
+    painted bool,
+    constraint mini_fk_id
+		foreign key (product_id)
+        references product(product_id),
+	constraint mini_fk_type
+		foreign key (product_type_id)
+        references product_type(product_type_id)
+);
+
+create table spell_deck
+(
+	product_id int primary key,
+    product_type_id  int not null default 3 check (product_type_id = 3),
+    deck_class varchar(25) not null,
+    constraint deck_fk_id
+		foreign key (product_id)
+        references product(product_id),
+	constraint deck_fk_type
+		foreign key (product_type_id)
+        references product_type(product_type_id)
+);
+
+insert into customer (cust_id, cust_name, cust_address, cust_state, cust_zip_code, cust_phone, cust_contact_last_name, cust_contact_first_name, cust_contact_email) values (null, 'Mydeo', '88 Lakeland Road', 'AR', '72215', '501-927-9201', 'Mattaser', 'Mattheus', 'mmattaser0@topsy.com');
+insert into customer (cust_id, cust_name, cust_address, cust_state, cust_zip_code, cust_phone, cust_contact_last_name, cust_contact_first_name, cust_contact_email) values (null, 'Abata', '386 Maple Wood Drive', 'CT', '06140', '860-857-3200', 'Dyson', 'Carla', 'cdyson1@illinois.edu');
+insert into customer (cust_id, cust_name, cust_address, cust_state, cust_zip_code, cust_phone, cust_contact_last_name, cust_contact_first_name, cust_contact_email) values (null, 'Avamba', '11 Carpenter Drive', 'WA', '98687', '360-982-7191', 'Cash', 'Colin', 'ccash2@symantec.com');
+insert into customer (cust_id, cust_name, cust_address, cust_state, cust_zip_code, cust_phone, cust_contact_last_name, cust_contact_first_name, cust_contact_email) values (null, 'Kare', '93519 Dennis Center', 'AZ', '85035', '602-665-9228', 'Hantusch', 'Georgie', 'ghantusch3@theatlantic.com');
+insert into customer (cust_id, cust_name, cust_address, cust_state, cust_zip_code, cust_phone, cust_contact_last_name, cust_contact_first_name, cust_contact_email) values (null, 'Feedbug', '133 Tomscot Avenue', 'AL', '35242', '205-914-4029', 'Lerven', 'Inger', 'ilerven4@simplemachines.org');
+insert into customer (cust_id, cust_name, cust_address, cust_state, cust_zip_code, cust_phone, cust_contact_last_name, cust_contact_first_name, cust_contact_email) values (null, 'Youopia', '4309 Canary Court', 'SC', '29225', '803-820-7005', 'Barefoot', 'Lev', 'lbarefoot5@zimbio.com');
+insert into customer (cust_id, cust_name, cust_address, cust_state, cust_zip_code, cust_phone, cust_contact_last_name, cust_contact_first_name, cust_contact_email) values (null, 'Leenti', '3 Parkside Center', 'TX', '77240', '713-660-4607', 'McMillan', 'Madeline', 'mmcmillan6@google.com.br');
+insert into customer (cust_id, cust_name, cust_address, cust_state, cust_zip_code, cust_phone, cust_contact_last_name, cust_contact_first_name, cust_contact_email) values (null, 'Vitz', '508 Myrtle Court', 'AL', '35220', '205-378-6543', 'Bougen', 'Natalee', 'nbougen7@cornell.edu');
+insert into customer (cust_id, cust_name, cust_address, cust_state, cust_zip_code, cust_phone, cust_contact_last_name, cust_contact_first_name, cust_contact_email) values (null, 'Vitz', '78243 Jay Avenue', 'PA', '18018', '484-279-2998', 'Sinclair', 'Boyce', 'bsinclair8@instagram.com');
+insert into customer (cust_id, cust_name, cust_address, cust_state, cust_zip_code, cust_phone, cust_contact_last_name, cust_contact_first_name, cust_contact_email) values (null, 'Zoonoodle', '6 Kings Road', 'CA', '94164', '415-177-3597', 'Housin', 'Mommy', 'mhousin9@wunderground.com');
+insert into customer (cust_id, cust_name, cust_address, cust_state, cust_zip_code, cust_phone, cust_contact_last_name, cust_contact_first_name, cust_contact_email) values (null, 'Skimia', '47 Stang Parkway', 'NY', '14269', '716-696-8524', 'Beacock', 'Sayres', 'sbeacocka@imdb.com');
+insert into customer (cust_id, cust_name, cust_address, cust_state, cust_zip_code, cust_phone, cust_contact_last_name, cust_contact_first_name, cust_contact_email) values (null, 'Kazio', '9732 Tony Court', 'VA', '22036', '571-429-9971', 'Romaint', 'Wright', 'wromaintb@intel.com');
+insert into customer (cust_id, cust_name, cust_address, cust_state, cust_zip_code, cust_phone, cust_contact_last_name, cust_contact_first_name, cust_contact_email) values (null, 'Linkbuzz', '5 Atwood Park', 'NV', '89510', '775-238-9609', 'Demchen', 'Gabriel', 'gdemchenc@surveymonkey.com');
+insert into customer (cust_id, cust_name, cust_address, cust_state, cust_zip_code, cust_phone, cust_contact_last_name, cust_contact_first_name, cust_contact_email) values (null, 'Babbleset', '035 Grayhawk Circle', 'MA', '01105', '413-997-7520', 'Motton', 'Emmet', 'emottond@macromedia.com');
+insert into customer (cust_id, cust_name, cust_address, cust_state, cust_zip_code, cust_phone, cust_contact_last_name, cust_contact_first_name, cust_contact_email) values (null, 'Topiclounge', '497 Continental Parkway', 'FL', '33763', '727-640-1797', 'Klawi', 'Sigfrid', 'sklawie@jigsy.com');
+insert into customer (cust_id, cust_name, cust_address, cust_state, cust_zip_code, cust_phone, cust_contact_last_name, cust_contact_first_name, cust_contact_email) values (null, 'Oloo', '1 Jenifer Point', 'NC', '28055', '704-714-1354', 'Wesker', 'Felisha', 'fweskerf@hexun.com');
+insert into customer (cust_id, cust_name, cust_address, cust_state, cust_zip_code, cust_phone, cust_contact_last_name, cust_contact_first_name, cust_contact_email) values (null, 'Quaxo', '24915 Cardinal Crossing', 'CA', '95108', '408-660-4360', 'Heintz', 'Renelle', 'rheintzg@godaddy.com');
+insert into customer (cust_id, cust_name, cust_address, cust_state, cust_zip_code, cust_phone, cust_contact_last_name, cust_contact_first_name, cust_contact_email) values (null, 'Browseblab', '8 Becker Court', 'AK', '99812', '907-775-4248', 'Kempster', 'Parsifal', 'pkempsterh@jugem.jp');
+insert into customer (cust_id, cust_name, cust_address, cust_state, cust_zip_code, cust_phone, cust_contact_last_name, cust_contact_first_name, cust_contact_email) values (null, 'Zoombox', '7 Donald Terrace', 'OH', '44393', '234-684-4984', 'Whiteford', 'Josselyn', 'jwhitefordi@arizona.edu');
+insert into customer (cust_id, cust_name, cust_address, cust_state, cust_zip_code, cust_phone, cust_contact_last_name, cust_contact_first_name, cust_contact_email) values (null, 'Centizu', '313 Northport Road', 'OH', '45020', '937-378-7037', 'Sherrard', 'Harley', 'hsherrardj@1688.com');
+
+insert into department (dept_id, dept_name) values (null, 'Production');
+insert into department (dept_id, dept_name) values (null, 'Sales');
+insert into department (dept_id, dept_name) values (null, 'Management');
+
+insert into e_position (pos_id, pos_name, pos_rateofpay, pos_dept) values (null, 'Chief Executive Officer', 134.50, 3);
+insert into e_position (pos_id, pos_name, pos_rateofpay, pos_dept) values (null, 'National Production Manager', 91.00, 3);
+insert into e_position (pos_id, pos_name, pos_rateofpay, pos_dept) values (null, 'Senior Sales Technician', 35.40, 2);
+insert into e_position (pos_id, pos_name, pos_rateofpay, pos_dept) values (null, 'Junion Sales Technician', 15.00, 2);
+insert into e_position (pos_id, pos_name, pos_rateofpay, pos_dept) values (null, 'Plant Manager', 45.78, 3);
+insert into e_position (pos_id, pos_name, pos_rateofpay, pos_dept) values (null, 'Production Operator', 20.00, 1);
+insert into e_position (pos_id, pos_name, pos_rateofpay, pos_dept) values (null, 'Executive Secretary', 54.9, 3);
+insert into e_position (pos_id, pos_name, pos_rateofpay, pos_dept) values (null, 'Chief Production Engineer', 133.17, 1);
+insert into e_position (pos_id, pos_name, pos_rateofpay, pos_dept) values (null, 'Sales Manager', 67.52, 3);
+insert into e_position (pos_id, pos_name, pos_rateofpay, pos_dept) values (null, 'National Inventory Manager', 85.00, 1);
+insert into e_position (pos_id, pos_name, pos_rateofpay, pos_dept) values (null, 'Internal Auditor', 67.39, 3);
+insert into e_position (pos_id, pos_name, pos_rateofpay, pos_dept) values (null, 'Junior Executive', 44.36, 3);
+insert into e_position (pos_id, pos_name, pos_rateofpay, pos_dept) values (null, 'Financial Advisor', 35.54, 3);
+insert into e_position (pos_id, pos_name, pos_rateofpay, pos_dept) values (null, 'Accounting Assistant', 33.04, 2);
+insert into e_position (pos_id, pos_name, pos_rateofpay, pos_dept) values (null, 'Production Engineer', 62.77, 1);
+insert into e_position (pos_id, pos_name, pos_rateofpay, pos_dept) values (null, 'Junior Programmer', 48.23, 1);
+insert into e_position (pos_id, pos_name, pos_rateofpay, pos_dept) values (null, 'Seniot Progammer', 70.00, 1);
+insert into e_position (pos_id, pos_name, pos_rateofpay, pos_dept) values (null, 'Financial Analyst', 45.19, 3);
+insert into e_position (pos_id, pos_name, pos_rateofpay, pos_dept) values (null, 'Human Resources Manager', 60.07, 3);
+insert into e_position (pos_id, pos_name, pos_rateofpay, pos_dept) values (null, 'Senior Cost Accountant', 107.78, 2);
+
+insert into factory (factory_id, factory_address, factory_city, factory_state, factory_zip_code) values (null, '95 Marcy Drive', 'Cincinnati', 'OH', '45243');
+insert into factory (factory_id, factory_address, factory_city, factory_state, factory_zip_code) values (null, '56410 Dorton Lane', 'Houston', 'TX', '77020');
+
+insert into employee (emp_id, emp_fname, emp_lname, emp_phone, emp_email, emp_address, emp_city, emp_state, emp_zip, emp_pos, emp_factory) values (null, 'Corrine', 'Tees', '214-644-0484', 'ctees0@amazon.co.jp', '11255 Lillian Alley', 'Dallas', 'TX', '75260', 2, 2);
+insert into employee (emp_id, emp_fname, emp_lname, emp_phone, emp_email, emp_address, emp_city, emp_state, emp_zip, emp_pos, emp_factory) values (null, 'Leandra', 'Jereatt', '513-666-7259', 'ljereatt1@prweb.com', '78630 Basil Pass', 'Cincinnati', 'OH', '45999', 8, 2);
+insert into employee (emp_id, emp_fname, emp_lname, emp_phone, emp_email, emp_address, emp_city, emp_state, emp_zip, emp_pos, emp_factory) values (null, 'Tessy', 'Ledbetter', '513-158-8917', 'tledbetter2@themeforest.net', '823 Norway Maple Point', 'Cincinnati', 'OH', '45999', 2, 1);
+insert into employee (emp_id, emp_fname, emp_lname, emp_phone, emp_email, emp_address, emp_city, emp_state, emp_zip, emp_pos, emp_factory) values (null, 'Andrea', 'Fattore', '915-176-3106', 'afattore3@nationalgeographic.com', '123 Thompson Junction', 'El Paso', 'TX', '79977', 2, 2);
+insert into employee (emp_id, emp_fname, emp_lname, emp_phone, emp_email, emp_address, emp_city, emp_state, emp_zip, emp_pos, emp_factory) values (null, 'Townsend', 'Lumm', '214-950-1257', 'tlumm4@cpanel.net', '7587 Cottonwood Avenue', 'Dallas', 'TX', '75236', 15, 1);
+insert into employee (emp_id, emp_fname, emp_lname, emp_phone, emp_email, emp_address, emp_city, emp_state, emp_zip, emp_pos, emp_factory) values (null, 'Ralf', 'Aloshechkin', '903-489-0077', 'raloshechkin5@wunderground.com', '15 Shopko Lane', 'Tyler', 'TX', '75799', 2, 2);
+insert into employee (emp_id, emp_fname, emp_lname, emp_phone, emp_email, emp_address, emp_city, emp_state, emp_zip, emp_pos, emp_factory) values (null, 'Meta', 'Durie', '401-268-8605', 'mdurie6@exblog.jp', '9645 Forest Dale Terrace', 'Amarillo', 'TX', '79171', 1, 1);
+insert into employee (emp_id, emp_fname, emp_lname, emp_phone, emp_email, emp_address, emp_city, emp_state, emp_zip, emp_pos, emp_factory) values (null, 'Austin', 'Peepall', '361-490-2928', 'apeepall7@huffingtonpost.com', '93 Hansons Crossing', 'Corpus Christi', 'TX', '78405', 10, 2);
+insert into employee (emp_id, emp_fname, emp_lname, emp_phone, emp_email, emp_address, emp_city, emp_state, emp_zip, emp_pos, emp_factory) values (null, 'Shell', 'Glinde', '937-491-4654', 'sglinde8@samsung.com', '60045 Heffernan Crossing', 'Dayton', 'OH', '45432', 14, 2);
+insert into employee (emp_id, emp_fname, emp_lname, emp_phone, emp_email, emp_address, emp_city, emp_state, emp_zip, emp_pos, emp_factory) values (null, 'Daphna', 'O'' Faherty', '281-362-0848', 'dofaherty9@merriam-webster.com', '9 Florence Avenue', 'Houston', 'TX', '77085', 19, 2);
+insert into employee (emp_id, emp_fname, emp_lname, emp_phone, emp_email, emp_address, emp_city, emp_state, emp_zip, emp_pos, emp_factory) values (null, 'Duncan', 'Mason', '903-567-8722', 'dmasona@sina.com.cn', '6440 David Pass', 'Tyler', 'TX', '75799', 14, 2);
+insert into employee (emp_id, emp_fname, emp_lname, emp_phone, emp_email, emp_address, emp_city, emp_state, emp_zip, emp_pos, emp_factory) values (null, 'Rodi', 'Soares', '214-153-5404', 'rsoaresb@ucsd.edu', '16 Bunting Park', 'Irving', 'TX', '75037', 14, 2);
+insert into employee (emp_id, emp_fname, emp_lname, emp_phone, emp_email, emp_address, emp_city, emp_state, emp_zip, emp_pos, emp_factory) values (null, 'Xymenes', 'Blaxton', '937-847-5629', 'xblaxtonc@biblegateway.com', '582 Hansons Drive', 'Dayton', 'OH', '45440', 10, 2);
+insert into employee (emp_id, emp_fname, emp_lname, emp_phone, emp_email, emp_address, emp_city, emp_state, emp_zip, emp_pos, emp_factory) values (null, 'Kordula', 'Galvin', '214-982-6780', 'kgalvind@squidoo.com', '812 Schurz Junction', 'Dallas', 'TX', '75310', 12, 2);
+insert into employee (emp_id, emp_fname, emp_lname, emp_phone, emp_email, emp_address, emp_city, emp_state, emp_zip, emp_pos, emp_factory) values (null, 'Ronny', 'Leveret', '513-130-4541', 'rleverete@dailymotion.com', '7 Golden Leaf Junction', 'Cincinnati', 'OH', '45249', 8, 1);
+insert into employee (emp_id, emp_fname, emp_lname, emp_phone, emp_email, emp_address, emp_city, emp_state, emp_zip, emp_pos, emp_factory) values (null, 'Georgeanna', 'Anwyl', '210-465-0258', 'ganwylf@netvibes.com', '18216 Onsgard Alley', 'San Antonio', 'TX', '78225', 7, 1);
+insert into employee (emp_id, emp_fname, emp_lname, emp_phone, emp_email, emp_address, emp_city, emp_state, emp_zip, emp_pos, emp_factory) values (null, 'Anabel', 'Chasmor', '281-774-2515', 'achasmorg@unesco.org', '121 Clove Alley', 'Katy', 'TX', '77493', 3, 2);
+insert into employee (emp_id, emp_fname, emp_lname, emp_phone, emp_email, emp_address, emp_city, emp_state, emp_zip, emp_pos, emp_factory) values (null, 'Terry', 'Cordobes', '817-547-2605', 'tcordobesh@sourceforge.net', '50 Sunbrook Crossing', 'Fort Worth', 'TX', '76121', 17, 2);
+insert into employee (emp_id, emp_fname, emp_lname, emp_phone, emp_email, emp_address, emp_city, emp_state, emp_zip, emp_pos, emp_factory) values (null, 'Darcy', 'Boate', '214-957-5185', 'dboatei@technorati.com', '21045 Transport Junction', 'Garland', 'TX', '75049', 1, 2);
+insert into employee (emp_id, emp_fname, emp_lname, emp_phone, emp_email, emp_address, emp_city, emp_state, emp_zip, emp_pos, emp_factory) values (null, 'Ramon', 'McKeveney', '713-703-3759', 'rmckeveneyj@dagondesign.com', '2 Northwestern Street', 'Houston', 'TX', '77228', 9, 1);
+insert into employee (emp_id, emp_fname, emp_lname, emp_phone, emp_email, emp_address, emp_city, emp_state, emp_zip, emp_pos, emp_factory) values (null, 'Gaspard', 'Bettenson', '713-970-7849', 'gbettensonk@google.com', '2 Division Point', 'Houston', 'TX', '77260', 19, 2);
+insert into employee (emp_id, emp_fname, emp_lname, emp_phone, emp_email, emp_address, emp_city, emp_state, emp_zip, emp_pos, emp_factory) values (null, 'Chelsea', 'Offener', '713-758-1119', 'coffenerl@hao123.com', '81 Bay Crossing', 'Houston', 'TX', '77260', 11, 2);
+insert into employee (emp_id, emp_fname, emp_lname, emp_phone, emp_email, emp_address, emp_city, emp_state, emp_zip, emp_pos, emp_factory) values (null, 'Felicity', 'Toseland', '512-110-8121', 'ftoselandm@ustream.tv', '8972 Summit Alley', 'Austin', 'TX', '78769', 15, 1);
+insert into employee (emp_id, emp_fname, emp_lname, emp_phone, emp_email, emp_address, emp_city, emp_state, emp_zip, emp_pos, emp_factory) values (null, 'Tory', 'Thies', '210-664-1175', 'tthiesn@illinois.edu', '8 Myrtle Alley', 'San Antonio', 'TX', '78225', 10, 1);
+insert into employee (emp_id, emp_fname, emp_lname, emp_phone, emp_email, emp_address, emp_city, emp_state, emp_zip, emp_pos, emp_factory) values (null, 'Heinrick', 'Greger', '419-423-3589', 'hgregero@google.pl', '2636 Union Pass', 'Toledo', 'OH', '43666', 1, 2);
+insert into employee (emp_id, emp_fname, emp_lname, emp_phone, emp_email, emp_address, emp_city, emp_state, emp_zip, emp_pos, emp_factory) values (null, 'Ernie', 'Gorrie', '512-300-1979', 'egorriep@constantcontact.com', '63143 Vahlen Road', 'Round Rock', 'TX', '78682', 3, 2);
+insert into employee (emp_id, emp_fname, emp_lname, emp_phone, emp_email, emp_address, emp_city, emp_state, emp_zip, emp_pos, emp_factory) values (null, 'Bink', 'Purkins', '214-498-0134', 'bpurkinsq@gmpg.org', '53 Mifflin Court', 'Dallas', 'TX', '75310', 15, 2);
+insert into employee (emp_id, emp_fname, emp_lname, emp_phone, emp_email, emp_address, emp_city, emp_state, emp_zip, emp_pos, emp_factory) values (null, 'Mar', 'Bambrough', '214-282-6333', 'mbambroughr@goodreads.com', '8202 Moulton Pass', 'Dallas', 'TX', '75379', 13, 2);
+insert into employee (emp_id, emp_fname, emp_lname, emp_phone, emp_email, emp_address, emp_city, emp_state, emp_zip, emp_pos, emp_factory) values (null, 'Eveline', 'Harbach', '214-277-3842', 'eharbachs@eventbrite.com', '13 Badeau Trail', 'Dallas', 'TX', '75323', 3, 2);
+insert into employee (emp_id, emp_fname, emp_lname, emp_phone, emp_email, emp_address, emp_city, emp_state, emp_zip, emp_pos, emp_factory) values (null, 'Valentine', 'Angelini', '915-142-4831', 'vangelinit@about.me', '90 Eggendart Place', 'El Paso', 'TX', '88530', 7, 2);
+insert into employee (emp_id, emp_fname, emp_lname, emp_phone, emp_email, emp_address, emp_city, emp_state, emp_zip, emp_pos, emp_factory) values (null, 'Cherri', 'Guitte', '713-226-0659', 'cguitteu@yahoo.com', '66316 David Court', 'Houston', 'TX', '77228', 8, 1);
+insert into employee (emp_id, emp_fname, emp_lname, emp_phone, emp_email, emp_address, emp_city, emp_state, emp_zip, emp_pos, emp_factory) values (null, 'Lew', 'Cotillard', '513-318-0958', 'lcotillardv@icq.com', '83 Red Cloud Point', 'Cincinnati', 'OH', '45208', 18, 2);
+insert into employee (emp_id, emp_fname, emp_lname, emp_phone, emp_email, emp_address, emp_city, emp_state, emp_zip, emp_pos, emp_factory) values (null, 'Hayes', 'Lynd', '915-605-1525', 'hlyndw@cnn.com', '5343 Pearson Circle', 'El Paso', 'TX', '88514', 1, 1);
+insert into employee (emp_id, emp_fname, emp_lname, emp_phone, emp_email, emp_address, emp_city, emp_state, emp_zip, emp_pos, emp_factory) values (null, 'Crissie', 'Brassill', '419-912-5282', 'cbrassillx@howstuffworks.com', '8 Grim Point', 'Hamilton', 'OH', '45020', 10, 2);
+insert into employee (emp_id, emp_fname, emp_lname, emp_phone, emp_email, emp_address, emp_city, emp_state, emp_zip, emp_pos, emp_factory) values (null, 'Daveen', 'Wescott', '614-684-8805', 'dwescotty@nasa.gov', '0 Weeping Birch Alley', 'Columbus', 'OH', '43215', 3, 2);
+insert into employee (emp_id, emp_fname, emp_lname, emp_phone, emp_email, emp_address, emp_city, emp_state, emp_zip, emp_pos, emp_factory) values (null, 'Juliet', 'Bartelet', '419-951-4010', 'jbarteletz@cnbc.com', '86512 Grayhawk Lane', 'Toledo', 'OH', '43615', 5, 1);
+insert into employee (emp_id, emp_fname, emp_lname, emp_phone, emp_email, emp_address, emp_city, emp_state, emp_zip, emp_pos, emp_factory) values (null, 'Kattie', 'Von Der Empten', '512-962-9347', 'kvonderempten10@quantcast.com', '1 Butterfield Alley', 'Austin', 'TX', '78703', 8, 2);
+insert into employee (emp_id, emp_fname, emp_lname, emp_phone, emp_email, emp_address, emp_city, emp_state, emp_zip, emp_pos, emp_factory) values (null, 'Hamid', 'Hotchkin', '216-649-7373', 'hhotchkin11@addtoany.com', '686 Northland Crossing', 'Cleveland', 'OH', '44105', 2, 2);
+insert into employee (emp_id, emp_fname, emp_lname, emp_phone, emp_email, emp_address, emp_city, emp_state, emp_zip, emp_pos, emp_factory) values (null, 'Daryl', 'Kornilyev', '806-853-8605', 'dkornilyev12@elegantthemes.com', '38 Paget Alley', 'Lubbock', 'TX', '79491', 20, 2);
+insert into employee (emp_id, emp_fname, emp_lname, emp_phone, emp_email, emp_address, emp_city, emp_state, emp_zip, emp_pos, emp_factory) values (null, 'Katie', 'Brahan', '937-188-7068', 'kbrahan13@rakuten.co.jp', '196 Vahlen Pass', 'Dayton', 'OH', '45440', 8, 2);
+insert into employee (emp_id, emp_fname, emp_lname, emp_phone, emp_email, emp_address, emp_city, emp_state, emp_zip, emp_pos, emp_factory) values (null, 'Barbee', 'Lifsey', '903-669-6971', 'blifsey14@narod.ru', '349 Cottonwood Lane', 'Tyler', 'TX', '75799', 9, 1);
+insert into employee (emp_id, emp_fname, emp_lname, emp_phone, emp_email, emp_address, emp_city, emp_state, emp_zip, emp_pos, emp_factory) values (null, 'Wendeline', 'Allridge', '512-486-2148', 'wallridge15@sogou.com', '6 Warner Park', 'Austin', 'TX', '78764', 19, 1);
+insert into employee (emp_id, emp_fname, emp_lname, emp_phone, emp_email, emp_address, emp_city, emp_state, emp_zip, emp_pos, emp_factory) values (null, 'Ken', 'Bussey', '214-384-6842', 'kbussey16@si.edu', '6454 Sugar Circle', 'Dallas', 'TX', '75323', 19, 2);
+insert into employee (emp_id, emp_fname, emp_lname, emp_phone, emp_email, emp_address, emp_city, emp_state, emp_zip, emp_pos, emp_factory) values (null, 'Penny', 'Midden', '713-613-7706', 'pmidden17@delicious.com', '4419 Tennessee Terrace', 'Houston', 'TX', '77228', 2, 2);
+insert into employee (emp_id, emp_fname, emp_lname, emp_phone, emp_email, emp_address, emp_city, emp_state, emp_zip, emp_pos, emp_factory) values (null, 'Granville', 'Caldecot', '614-187-6619', 'gcaldecot18@youtu.be', '4261 Gina Center', 'Columbus', 'OH', '43220', 16, 2);
+insert into employee (emp_id, emp_fname, emp_lname, emp_phone, emp_email, emp_address, emp_city, emp_state, emp_zip, emp_pos, emp_factory) values (null, 'Sidonnie', 'Arnowitz', '806-373-9827', 'sarnowitz19@pen.io', '13 Parkside Terrace', 'Lubbock', 'TX', '79405', 19, 1);
+insert into employee (emp_id, emp_fname, emp_lname, emp_phone, emp_email, emp_address, emp_city, emp_state, emp_zip, emp_pos, emp_factory) values (null, 'Tabbi', 'McGrane', '865-650-8802', 'tmcgrane1a@webnode.com', '94 Oriole Way', 'Amarillo', 'TX', '79165', 5, 1);
+insert into employee (emp_id, emp_fname, emp_lname, emp_phone, emp_email, emp_address, emp_city, emp_state, emp_zip, emp_pos, emp_factory) values (null, 'Bengt', 'Eastridge', '713-169-2475', 'beastridge1b@last.fm', '8201 American Ash Court', 'Houston', 'TX', '77234', 1, 2);
+insert into employee (emp_id, emp_fname, emp_lname, emp_phone, emp_email, emp_address, emp_city, emp_state, emp_zip, emp_pos, emp_factory) values (null, 'Mersey', 'Halfhead', '214-543-2553', 'mhalfhead1c@techcrunch.com', '275 Hudson Drive', 'Garland', 'TX', '75049', 14, 2);
+insert into employee (emp_id, emp_fname, emp_lname, emp_phone, emp_email, emp_address, emp_city, emp_state, emp_zip, emp_pos, emp_factory) values (null, 'Kimbra', 'Vogelein', '915-826-2223', 'kvogelein1d@wix.com', '00770 Upham Lane', 'El Paso', 'TX', '79945', 10, 1);
+insert into employee (emp_id, emp_fname, emp_lname, emp_phone, emp_email, emp_address, emp_city, emp_state, emp_zip, emp_pos, emp_factory) values (null, 'Garfield', 'Lovering', '513-149-4956', 'glovering1e@nps.gov', '077 Springs Lane', 'Cincinnati', 'OH', '45218', 8, 2);
+insert into employee (emp_id, emp_fname, emp_lname, emp_phone, emp_email, emp_address, emp_city, emp_state, emp_zip, emp_pos, emp_factory) values (null, 'Deva', 'Signore', '936-425-2068', 'dsignore1f@csmonitor.com', '46925 Fisk Place', 'Beaumont', 'TX', '77705', 19, 1);
+insert into employee (emp_id, emp_fname, emp_lname, emp_phone, emp_email, emp_address, emp_city, emp_state, emp_zip, emp_pos, emp_factory) values (null, 'Fara', 'Rillstone', '512-703-1146', 'frillstone1g@pagesperso-orange.fr', '83 Jay Crossing', 'Austin', 'TX', '78769', 1, 1);
+insert into employee (emp_id, emp_fname, emp_lname, emp_phone, emp_email, emp_address, emp_city, emp_state, emp_zip, emp_pos, emp_factory) values (null, 'Arabella', 'Truelock', '419-895-5372', 'atruelock1h@clickbank.net', '071 Tomscot Lane', 'Toledo', 'OH', '43635', 18, 1);
+insert into employee (emp_id, emp_fname, emp_lname, emp_phone, emp_email, emp_address, emp_city, emp_state, emp_zip, emp_pos, emp_factory) values (null, 'Jo-anne', 'Sweating', '214-711-5358', 'jsweating1i@intel.com', '6 Anhalt Terrace', 'Dallas', 'TX', '75265', 9, 2);
+insert into employee (emp_id, emp_fname, emp_lname, emp_phone, emp_email, emp_address, emp_city, emp_state, emp_zip, emp_pos, emp_factory) values (null, 'Brion', 'Plumm', '325-853-3770', 'bplumm1j@php.net', '6189 Raven Lane', 'San Angelo', 'TX', '76905', 13, 2);
+insert into employee (emp_id, emp_fname, emp_lname, emp_phone, emp_email, emp_address, emp_city, emp_state, emp_zip, emp_pos, emp_factory) values (null, 'Olwen', 'Roskilly', '513-322-4316', 'oroskilly1k@ox.ac.uk', '94 Bonner Circle', 'Cincinnati', 'OH', '45999', 13, 2);
+insert into employee (emp_id, emp_fname, emp_lname, emp_phone, emp_email, emp_address, emp_city, emp_state, emp_zip, emp_pos, emp_factory) values (null, 'Job', 'Muddle', '214-406-4410', 'jmuddle1l@hc360.com', '12837 Hermina Circle', 'Dallas', 'TX', '75397', 6, 1);
+insert into employee (emp_id, emp_fname, emp_lname, emp_phone, emp_email, emp_address, emp_city, emp_state, emp_zip, emp_pos, emp_factory) values (null, 'Remington', 'Haggett', '512-747-8201', 'rhaggett1m@theatlantic.com', '9727 Eliot Way', 'Austin', 'TX', '78759', 20, 1);
+insert into employee (emp_id, emp_fname, emp_lname, emp_phone, emp_email, emp_address, emp_city, emp_state, emp_zip, emp_pos, emp_factory) values (null, 'Gradeigh', 'Swinnard', '512-673-6440', 'gswinnard1n@plala.or.jp', '494 Melvin Pass', 'Austin', 'TX', '78769', 10, 1);
+insert into employee (emp_id, emp_fname, emp_lname, emp_phone, emp_email, emp_address, emp_city, emp_state, emp_zip, emp_pos, emp_factory) values (null, 'Marena', 'Brownsell', '330-504-9037', 'mbrownsell1o@eventbrite.com', '45963 Ronald Regan Pass', 'Youngstown', 'OH', '44511', 7, 2);
+insert into employee (emp_id, emp_fname, emp_lname, emp_phone, emp_email, emp_address, emp_city, emp_state, emp_zip, emp_pos, emp_factory) values (null, 'Monty', 'Beviss', '210-881-7780', 'mbeviss1p@scientificamerican.com', '53213 Sheridan Drive', 'San Antonio', 'TX', '78220', 14, 2);
+insert into employee (emp_id, emp_fname, emp_lname, emp_phone, emp_email, emp_address, emp_city, emp_state, emp_zip, emp_pos, emp_factory) values (null, 'Giordano', 'Freeburn', '513-169-0345', 'gfreeburn1q@youtube.com', '7 Dennis Crossing', 'Cincinnati', 'OH', '45218', 7, 1);
+insert into employee (emp_id, emp_fname, emp_lname, emp_phone, emp_email, emp_address, emp_city, emp_state, emp_zip, emp_pos, emp_factory) values (null, 'Adah', 'Beasley', '682-644-9027', 'abeasley1r@alibaba.com', '25144 Oak Street', 'Fort Worth', 'TX', '76110', 13, 1);
+insert into employee (emp_id, emp_fname, emp_lname, emp_phone, emp_email, emp_address, emp_city, emp_state, emp_zip, emp_pos, emp_factory) values (null, 'Cullen', 'Tortice', '713-880-4995', 'ctortice1s@nationalgeographic.com', '8 Parkside Alley', 'Houston', 'TX', '77240', 2, 2);
+insert into employee (emp_id, emp_fname, emp_lname, emp_phone, emp_email, emp_address, emp_city, emp_state, emp_zip, emp_pos, emp_factory) values (null, 'Frederigo', 'Itscowics', '432-464-8036', 'fitscowics1t@wufoo.com', '62 Kinsman Place', 'Midland', 'TX', '79705', 20, 2);
+insert into employee (emp_id, emp_fname, emp_lname, emp_phone, emp_email, emp_address, emp_city, emp_state, emp_zip, emp_pos, emp_factory) values (null, 'Angel', 'Oppy', '972-584-2657', 'aoppy1u@dedecms.com', '76196 Northfield Trail', 'Garland', 'TX', '75044', 17, 2);
+insert into employee (emp_id, emp_fname, emp_lname, emp_phone, emp_email, emp_address, emp_city, emp_state, emp_zip, emp_pos, emp_factory) values (null, 'Errol', 'Foulser', '419-915-8856', 'efoulser1v@nymag.com', '625 Beilfuss Junction', 'Toledo', 'OH', '43605', 7, 2);
+insert into employee (emp_id, emp_fname, emp_lname, emp_phone, emp_email, emp_address, emp_city, emp_state, emp_zip, emp_pos, emp_factory) values (null, 'Marlow', 'Swaffer', '281-266-4431', 'mswaffer1w@berkeley.edu', '6 Eastwood Trail', 'Amarillo', 'TX', '79176', 11, 1);
+insert into employee (emp_id, emp_fname, emp_lname, emp_phone, emp_email, emp_address, emp_city, emp_state, emp_zip, emp_pos, emp_factory) values (null, 'Rick', 'Klimp', '682-220-3906', 'rklimp1x@europa.eu', '2537 Luster Street', 'Fort Worth', 'TX', '76178', 12, 1);
+insert into employee (emp_id, emp_fname, emp_lname, emp_phone, emp_email, emp_address, emp_city, emp_state, emp_zip, emp_pos, emp_factory) values (null, 'Valentijn', 'Marrows', '281-413-0901', 'vmarrows1y@redcross.org', '20901 Algoma Parkway', 'Houston', 'TX', '77090', 20, 1);
+insert into employee (emp_id, emp_fname, emp_lname, emp_phone, emp_email, emp_address, emp_city, emp_state, emp_zip, emp_pos, emp_factory) values (null, 'Lane', 'Sturdy', '210-860-0538', 'lsturdy1z@mtv.com', '6 Pond Trail', 'San Antonio', 'TX', '78205', 17, 2);
+insert into employee (emp_id, emp_fname, emp_lname, emp_phone, emp_email, emp_address, emp_city, emp_state, emp_zip, emp_pos, emp_factory) values (null, 'Melamie', 'Houlaghan', '512-261-0442', 'mhoulaghan20@yolasite.com', '0537 Cottonwood Drive', 'Austin', 'TX', '78769', 9, 1);
+insert into employee (emp_id, emp_fname, emp_lname, emp_phone, emp_email, emp_address, emp_city, emp_state, emp_zip, emp_pos, emp_factory) values (null, 'Aurthur', 'Paraman', '214-470-2972', 'aparaman21@wufoo.com', '8 Forest Dale Junction', 'Dallas', 'TX', '75210', 20, 1);
+insert into employee (emp_id, emp_fname, emp_lname, emp_phone, emp_email, emp_address, emp_city, emp_state, emp_zip, emp_pos, emp_factory) values (null, 'Uri', 'McKeating', '214-761-2937', 'umckeating22@wufoo.com', '56340 Wayridge Street', 'Dallas', 'TX', '75379', 12, 2);
+insert into employee (emp_id, emp_fname, emp_lname, emp_phone, emp_email, emp_address, emp_city, emp_state, emp_zip, emp_pos, emp_factory) values (null, 'Donnajean', 'Shieldon', '281-644-0588', 'dshieldon23@facebook.com', '253 Graedel Street', 'Houston', 'TX', '77045', 16, 1);
+insert into employee (emp_id, emp_fname, emp_lname, emp_phone, emp_email, emp_address, emp_city, emp_state, emp_zip, emp_pos, emp_factory) values (null, 'Dwain', 'Prestedge', '915-217-8476', 'dprestedge24@opensource.org', '8 Loomis Point', 'El Paso', 'TX', '88541', 2, 2);
+insert into employee (emp_id, emp_fname, emp_lname, emp_phone, emp_email, emp_address, emp_city, emp_state, emp_zip, emp_pos, emp_factory) values (null, 'Tabb', 'McHugh', '254-660-2731', 'tmchugh25@eventbrite.com', '89 Mccormick Crossing', 'Gatesville', 'TX', '76598', 13, 2);
+insert into employee (emp_id, emp_fname, emp_lname, emp_phone, emp_email, emp_address, emp_city, emp_state, emp_zip, emp_pos, emp_factory) values (null, 'Fanechka', 'Heeney', '214-596-6485', 'fheeney26@over-blog.com', '39 Sullivan Drive', 'Dallas', 'TX', '75210', 16, 1);
+insert into employee (emp_id, emp_fname, emp_lname, emp_phone, emp_email, emp_address, emp_city, emp_state, emp_zip, emp_pos, emp_factory) values (null, 'Jolyn', 'Crame', '915-807-6915', 'jcrame27@sphinn.com', '21 Carey Trail', 'El Paso', 'TX', '79934', 20, 2);
+
+insert into product_type(product_type_id, product_type) values (1, "Di Set");
+insert into product_type(product_type_id, product_type) values (2, "Miniature");
+insert into product_type(product_type_id, product_type) values (3, "Spell Deck");
+
+insert into product (product_id, product_type_id, product_factory, product_totalqty) values (null, 1, 1, 155);
+insert into di_set (product_id, product_type_id, set_color, set_material, set_pcs) values (1, 1, 'blue', 'acrylic', 6);
+
+insert into product (product_id, product_type_id, product_factory, product_totalqty) values (null, 1, 1, 360);
+insert into di_set (product_id, product_type_id, set_color, set_material, set_pcs) values (2, 1, 'green', 'acrylic', 6);
+
+insert into product (product_id, product_type_id, product_factory, product_totalqty) values (null, 1, 1, 170);
+insert into di_set (product_id, product_type_id, set_color, set_material, set_pcs) values (3, 1, 'red', 'acrylic', 6);
+
+insert into product (product_id, product_type_id, product_factory, product_totalqty) values (null, 1, 1, 419);
+insert into di_set (product_id, product_type_id, set_color, set_material, set_pcs) values (4, 1, 'blue', 'acrylic', 6);
+
+insert into product (product_id, product_type_id, product_factory, product_totalqty) values (null, 1, 1, 174);
+insert into di_set (product_id, product_type_id, set_color, set_material, set_pcs) values (5, 1, 'clear', 'acrylic', 8);
+
+insert into product (product_id, product_type_id, product_factory, product_totalqty) values (null, 1, 1, 25);
+insert into di_set (product_id, product_type_id, set_color, set_material, set_pcs) values (6, 1, 'black', 'acrylic', 8);
+
+insert into product (product_id, product_type_id, product_factory, product_totalqty) values (null, 2, 1, 106);
+insert into miniature(product_id, product_type_id, mini_model, mini_size, painted) values (7, 2, 'Young Dragon', 'M', false);
+
+insert into product (product_id, product_type_id, product_factory, product_totalqty) values (null, 2, 1, 336);
+insert into miniature(product_id, product_type_id, mini_model, mini_size, painted) values (8, 2, 'Ogre', 'L', true);
+
+insert into product (product_id, product_type_id, product_factory, product_totalqty) values (null, 2, 1, 65);
+insert into miniature(product_id, product_type_id, mini_model, mini_size, painted) values (9, 2, 'Goblin', 'S', true);
+
+insert into product (product_id, product_type_id, product_factory, product_totalqty) values (null, 2, 1, 417);
+insert into miniature(product_id, product_type_id, mini_model, mini_size, painted) values (10, 2, 'Bandit', 'S', true);
+
+insert into product (product_id, product_type_id, product_factory, product_totalqty) values (null, 2, 1, 290);
+insert into miniature(product_id, product_type_id, mini_model, mini_size, painted) values (11, 2, 'Thunder Giant', 'L', false);
+
+insert into product (product_id, product_type_id, product_factory, product_totalqty) values (null, 2, 1, 226);
+insert into miniature(product_id, product_type_id, mini_model, mini_size, painted) values (12, 2, 'Zombie', 'S', false);
+
+insert into product (product_id, product_type_id, product_factory, product_totalqty) values (null, 2, 1, 255);
+insert into miniature(product_id, product_type_id, mini_model, mini_size, painted) values (13, 2, 'Adult Dragon', 'L', false);
+
+insert into product (product_id, product_type_id, product_factory, product_totalqty) values (null, 2, 1, 403);
+insert into miniature(product_id, product_type_id, mini_model, mini_size, painted) values (14, 2, 'Demogorgon', 'L', true);
+
+insert into product (product_id, product_type_id, product_factory, product_totalqty) values (null, 3, 2, 331); 
+insert into spell_deck(product_id, product_type_id, deck_class) values (15, 3, 'Wizard');
+
+insert into product (product_id, product_type_id, product_factory, product_totalqty) values (null, 3, 2, 49); 
+insert into spell_deck(product_id, product_type_id, deck_class) values (16, 3, 'Warlock');
+
+insert into product (product_id, product_type_id, product_factory, product_totalqty) values (null, 3, 2, 95); 
+insert into spell_deck(product_id, product_type_id, deck_class) values (17, 3, 'Sorceror');
+
+insert into product (product_id, product_type_id, product_factory, product_totalqty) values (null, 3, 2, 284); 
+insert into spell_deck(product_id, product_type_id, deck_class) values (18, 3, 'Druid');
+
+insert into product (product_id, product_type_id, product_factory, product_totalqty) values (null, 3, 2, 299);
+insert into spell_deck(product_id, product_type_id, deck_class) values (19, 3, 'Cleric');
+
+insert into product (product_id, product_type_id, product_factory, product_totalqty) values (null, 3, 2, 53);
+insert into spell_deck(product_id, product_type_id, deck_class) values (20, 3, 'Bard');
+
+insert into product (product_id, product_type_id, product_factory, product_totalqty) values (null, 3, 2, 53); 
+insert into spell_deck(product_id, product_type_id, deck_class) values (21, 3, 'Paladin');
+
+insert into product (product_id, product_type_id, product_factory, product_totalqty) values (null, 3, 2, 43); 
+insert into spell_deck(product_id, product_type_id, deck_class) values (22, 3, 'Ranger');
+
+insert into invoice (invoice_id, cust_id, invoice_date, invoice_shipdate) values (null, 4, '2021-06-13', '2021-06-26');
+insert into product_order (product_id, invoice_id, product_price, product_qty) values (2, 1, 11.4, 5);
+insert into product_order (product_id, invoice_id, product_price, product_qty) values (10, 1, 5.4, 18);
+
+insert into invoice (invoice_id, cust_id, invoice_date, invoice_shipdate) values (null, 3, '2021-07-03', '2021-09-13');
+insert into product_order (product_id, invoice_id, product_price, product_qty) values (6, 2, 22.26, 62);
+
+insert into invoice (invoice_id, cust_id, invoice_date, invoice_shipdate) values (null, 19, '2021-04-13', '2021-10-18');
+insert into product_order (product_id, invoice_id, product_price, product_qty) values (18, 3, 18.22, 40);
+
+insert into invoice (invoice_id, cust_id, invoice_date, invoice_shipdate) values (null, 19, '2021-01-27', '2021-05-24');
+insert into product_order (product_id, invoice_id, product_price, product_qty) values (21, 4, 2.7, 80);
+
+insert into invoice (invoice_id, cust_id, invoice_date, invoice_shipdate) values (null, 14, '2021-01-26', '2021-07-02');
+insert into product_order (product_id, invoice_id, product_price, product_qty) values (22, 5, 15.19, 75);
+
+insert into invoice (invoice_id, cust_id, invoice_date, invoice_shipdate) values (null, 15, '2020-11-23', '2020-12-01');
+insert into product_order (product_id, invoice_id, product_price, product_qty) values (14, 6, 14.84, 41);
+
+insert into invoice (invoice_id, cust_id, invoice_date, invoice_shipdate) values (null, 8, '2021-05-03', '2021-07-01');
+insert into product_order (product_id, invoice_id, product_price, product_qty) values (10, 7, 18.03, 18);
+
+insert into invoice (invoice_id, cust_id, invoice_date, invoice_shipdate) values (null, 6, '2021-07-24', '2021-04-13');
+insert into product_order (product_id, invoice_id, product_price, product_qty) values (5, 8, 16.57, 19);
+
+insert into invoice (invoice_id, cust_id, invoice_date, invoice_shipdate) values (null, 11, '2021-01-14', '2020-11-11');
+insert into product_order (product_id, invoice_id, product_price, product_qty) values (15, 9, 11.37, 7);
+
+insert into invoice (invoice_id, cust_id, invoice_date, invoice_shipdate) values (null, 16, '2021-08-08', '2021-09-13');
+insert into product_order (product_id, invoice_id, product_price, product_qty) values (12, 10, 3.68, 17);
+
+insert into invoice (invoice_id, cust_id, invoice_date, invoice_shipdate) values (null, 5, '2021-08-17', '2020-12-02');
+insert into product_order (product_id, invoice_id, product_price, product_qty) values (12, 11, 14.17, 32);
+
+insert into invoice (invoice_id, cust_id, invoice_date, invoice_shipdate) values (null, 12, '2021-09-22', '2021-05-27');
+insert into product_order (product_id, invoice_id, product_price, product_qty) values (14, 12, 14.78, 42);
+
+insert into invoice (invoice_id, cust_id, invoice_date, invoice_shipdate) values (null, 17, '2021-08-26', '2020-12-09');
+insert into product_order (product_id, invoice_id, product_price, product_qty) values (12, 13, 21.29, 48);
+
+insert into invoice (invoice_id, cust_id, invoice_date, invoice_shipdate) values (null, 2, '2021-07-01', '2021-05-21');
+insert into product_order (product_id, invoice_id, product_price, product_qty) values (6, 14, 4.61, 70);
+
+insert into invoice (invoice_id, cust_id, invoice_date, invoice_shipdate) values (null, 18, '2021-02-11', '2021-01-12');
+insert into product_order (product_id, invoice_id, product_price, product_qty) values (5, 15, 10.73, 4);
+
+insert into invoice (invoice_id, cust_id, invoice_date, invoice_shipdate) values (null, 13, '2021-10-16', '2021-04-30');
+insert into product_order (product_id, invoice_id, product_price, product_qty) values (11, 16, 23.72, 97);
+
+insert into invoice (invoice_id, cust_id, invoice_date, invoice_shipdate) values (null, 18, '2021-09-04', '2021-03-09');
+insert into product_order (product_id, invoice_id, product_price, product_qty) values (11, 17, 18.13, 84);
+
+insert into invoice (invoice_id, cust_id, invoice_date, invoice_shipdate) values (null, 17, '2021-03-25', '2020-11-23');
+insert into product_order (product_id, invoice_id, product_price, product_qty) values (9, 18, 10.65, 57);
+
+insert into invoice (invoice_id, cust_id, invoice_date, invoice_shipdate) values (null, 18, '2020-11-28', '2021-07-28');
+insert into product_order (product_id, invoice_id, product_price, product_qty) values (19, 19, 3.13, 50);
+
+insert into invoice (invoice_id, cust_id, invoice_date, invoice_shipdate) values (null, 11, '2020-11-19', '2021-10-10');
+insert into product_order (product_id, invoice_id, product_price, product_qty) values (11, 20, 6.71, 38);
+
+
+
+update invoice i
+set invoice_total = (select sum(order_total) as ord_tot from product_order 
+where product_order.invoice_id=i.invoice_id
+group by invoice_id);
+
+select * from invoice;
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+
+  
+
+        
+
+
+    
+
+  
+
+
+
+
+
+
+
+
